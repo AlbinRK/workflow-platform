@@ -13,6 +13,7 @@ import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
 //Jwt filter runs every request -> checks jwt ->authenticates user
+
 @Component
 public class JwtFilter extends OncePerRequestFilter {
 
@@ -33,16 +34,21 @@ public class JwtFilter extends OncePerRequestFilter {
 
         if(header != null && header.startsWith("Bearer ")){
             String token = header.substring(7); //remove bearer
-            String email = jwtUtil.extractEmail(token);
+            String email = jwtUtil.extractEmail(token);  //extract mail from token
 
-            UserDetails userDetails = userDetailsService.loadUserByUsername(email);
+            UserDetails userDetails = userDetailsService.loadUserByUsername(email); //load user from db
 
+            //creating authentication object - user is authenticated
+            //password is given null - password  is not needed now
             UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(
                     userDetails, null, userDetails.getAuthorities()
             );
+
+            //tells spring user is logged in for the request
             SecurityContextHolder.getContext().setAuthentication(auth);
 
         }
+        //pass control to next filter or controller
         filterChain.doFilter(request, response);
     }
 }
